@@ -2,7 +2,7 @@ name: Heartbeat
 
 on:
   schedule:
-    - cron: "0 */6 * * *"
+    - cron: "0 */2 * * *"
   workflow_dispatch:
 
 permissions:
@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Generate README
         shell: bash
@@ -31,12 +31,12 @@ jobs:
           # 🤖 GitHub Heartbeat
 
           ![Status](https://img.shields.io/badge/Status-Online-brightgreen)
-          ![Updated Every 6 Hours](https://img.shields.io/badge/Updates-Every%206%20Hours-blue)
+          ![Updates](https://img.shields.io/badge/Updates-Every%206%20Hours-blue)
 
           ---
 
           | Metric | Value |
-          |--------|------|
+          |--------|-------|
           | 🕒 Last Update | $(date -u +"%Y-%m-%d %H:%M UTC") |
           | 🌍 Current UTC Time | $(date -u +"%H:%M:%S") |
           | 📅 Days Since Repository Created | $DAYS |
@@ -53,15 +53,21 @@ jobs:
           Repository updates automatically every **6 hours** using **GitHub Actions**.
           EOF
 
-      - name: Commit
+      - name: Commit and Push
+        shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add README.md
 
-          git diff --cached --quiet && exit 0
+          if git diff --cached --quiet; then
+            echo "No changes."
+            exit 0
+          fi
 
           git commit -m "Heartbeat #${{ github.run_number }}"
+
+          git pull --rebase origin main
 
           git push
