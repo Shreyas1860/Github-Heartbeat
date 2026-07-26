@@ -2,7 +2,7 @@ name: Heartbeat
 
 on:
   schedule:
-    - cron: "0 */2 * * *"   # Every 6 hours (UTC)
+    - cron: "0 */6 * * *"
   workflow_dispatch:
 
 permissions:
@@ -13,35 +13,47 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Update README
+      - name: Generate README
+        shell: bash
         run: |
-          RUN=$(( $(date +%s) ))
-          RANDOM_NUM=$(( RANDOM ))
 
-          cat > README.md << EOF
+          CREATED=$(git log --reverse --format=%ad --date=short | head -1)
+
+          TODAY=$(date +%F)
+
+          DAYS=$(( ( $(date -d "$TODAY" +%s) - $(date -d "$CREATED" +%s) ) / 86400 ))
+
+          FACT=$(shuf -n 1 facts.txt)
+
+          cat > README.md <<EOF
           # 🤖 GitHub Heartbeat
 
-          This repository updates itself automatically.
+          ![Status](https://img.shields.io/badge/Status-Online-brightgreen)
+          ![Updated Every 6 Hours](https://img.shields.io/badge/Updates-Every%206%20Hours-blue)
 
-          ## Status
+          ---
 
-          Last Update:
+          | Metric | Value |
+          |--------|------|
+          | 🕒 Last Update | $(date -u +"%Y-%m-%d %H:%M UTC") |
+          | 🌍 Current UTC Time | $(date -u +"%H:%M:%S") |
+          | 📅 Days Since Repository Created | $DAYS |
+          | 🔢 Total Workflow Runs | ${{ github.run_number }} |
 
-          $(date -u)
+          ---
 
-          Run Number:
+          ## 💡 Programming Fact
 
-          $RUN
+          > $FACT
 
-          Random Number:
+          ---
 
-          $RANDOM_NUM
+          Repository updates automatically every **6 hours** using **GitHub Actions**.
           EOF
 
-      - name: Commit changes
+      - name: Commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -50,6 +62,6 @@ jobs:
 
           git diff --cached --quiet && exit 0
 
-          git commit -m "Heartbeat update"
+          git commit -m "Heartbeat #${{ github.run_number }}"
 
           git push

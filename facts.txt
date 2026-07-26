@@ -1,0 +1,12 @@
+Python's `import this` prints the Zen of Python.
+Git is a distributed version control system.
+The first computer bug was an actual moth.
+Python was named after Monty Python.
+C was created in 1972.
+Linux powers most web servers.
+JavaScript was created in just 10 days.
+Rust guarantees memory safety without a garbage collector.
+Go was created at Google.
+Recursion is when a function calls itself.
+Binary uses only 0 and 1.
+The first domain name was symbolics.com.
